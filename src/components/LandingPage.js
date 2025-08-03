@@ -1,96 +1,71 @@
 import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
-
-
-const Container = styled(motion.div)`
-  height: 100vh;
-  width: 100vw;
-  background: #0a0a0a;
-  color: ${({ theme }) => theme.colors.gold};
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-  padding: 0 20px;
-`;
-
-
-const Title = styled(motion.h1)`
-  font-family: ${({theme}) => theme.fonts.accent};
-  font-weight: 900;
-  font-size: clamp(2.5rem, 6vw, 4.8rem);
-  letter-spacing: 0.1em;
-  text-align: center;
-  margin-bottom: 0.5em;
-  text-shadow: 0 0 10px ${({ theme }) => theme.colors.gold};
-`;
-
-
-const SubTitle = styled(motion.h2)`
-  font-family: ${({theme}) => theme.fonts.main};
-  font-weight: 400;
-  font-size: clamp(1rem, 2vw, 1.8rem);
-  color: ${({ theme }) => theme.colors.goldLight};
-  margin-bottom: 3em;
-  letter-spacing: 0.05em;
-`;
-
-
-const EnterButton = styled(motion.button)`
-  background: linear-gradient(135deg, #d4af37 0%, #f7e162 100%);
-  padding: 1em 3em;
-  border-radius: 30px;
-  border: none;
-  color: ${({ theme }) => theme.colors.black};
-  font-size: 1.25rem;
-  font-weight: 700;
-  box-shadow: 0 0 15px #d4af37cc;
-  transition: box-shadow 0.3s ease;
-  user-select: none;
-
-  &:hover {
-    box-shadow: 0 0 30px #fabf50dd;
-  }
-  &:active {
-    scale: 0.95;
-  }
-`;
-
 
 export default function LandingPage({ onEnter }) {
   const vantaRef = useRef(null);
   const vantaEffect = useRef(null);
-
+  const [isLoading, setIsLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    // Destroy any previous instance for hot reloading
-    if (vantaEffect.current) {
-      vantaEffect.current.destroy();
-      vantaEffect.current = null;
-    }
-    if (window.VANTA && window.THREE) {
-      vantaEffect.current = window.VANTA.FOG({
-        el: vantaRef.current,
-        mouseControls: true,
-        touchControls: true,
-        gyroControls: false,
-        minHeight: 200.0,
-        minWidth: 200.0,
+    let attempts = 0;
+    const maxAttempts = 20;
 
-        highlightColor: 0xffffff,    // Soft white fog highlight
-        midtoneColor: 0xd4af37,      // Touch of gold in midtones
-        lowlightColor: 0x222222,     // Soft gray/dark in lowlights
-        baseColor: 0x0a0a0a,         // Black BG
-        blurFactor: 0.30,            // Lower for softer look
-        speed: 0.8,                  // Subtle movement
-        zoom: 0.9,                   // Little less zoom, gentler
-      });
-    }
+    const initVanta = () => {
+      attempts++;
+
+      if (!vantaRef.current) {
+        if (attempts < maxAttempts) {
+          setTimeout(initVanta, 100);
+        }
+        return;
+      }
+
+      // Check if Vanta and THREE are available
+      if (typeof window !== 'undefined' && window.VANTA && window.VANTA.CLOUDS && window.THREE) {
+        try {
+          // Destroy any existing effect
+          if (vantaEffect.current) {
+            vantaEffect.current.destroy();
+          }
+
+          // Initialize Vanta Clouds
+          vantaEffect.current = window.VANTA.CLOUDS({
+            el: vantaRef.current,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: window.innerHeight,
+            minWidth: window.innerWidth,
+            skyColor: 0x68b8d7,
+            cloudColor: 0xadc1de,
+            cloudShadowColor: 0x183550,
+            sunlightColor: 0xff9933,
+            speed: 1.2,
+            zoom: 0.75,
+          });
+
+          console.log('Vanta effect initialized successfully');
+          setIsLoading(false);
+        } catch (error) {
+          console.error('Error initializing Vanta:', error);
+          setIsLoading(false);
+        }
+      } else {
+        console.log(`Attempt ${attempts}: Vanta dependencies not ready`);
+        if (attempts < maxAttempts) {
+          setTimeout(initVanta, 200);
+        } else {
+          console.error('Failed to initialize Vanta after maximum attempts');
+          setIsLoading(false);
+        }
+      }
+    };
+
+    // Start initialization with a small delay
+    const timeout = setTimeout(initVanta, 100);
+
     return () => {
+      clearTimeout(timeout);
       if (vantaEffect.current) {
         vantaEffect.current.destroy();
         vantaEffect.current = null;
@@ -98,49 +73,213 @@ export default function LandingPage({ onEnter }) {
     };
   }, []);
 
-  // On button click: trigger text zoom animation, then call onEnter after delay
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (vantaEffect.current) {
+        vantaEffect.current.resize();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleEnterClick = () => {
-    if (isAnimating) return; // prevent double click
+    if (isAnimating) return;
     setIsAnimating(true);
     setTimeout(() => {
       onEnter && onEnter();
-
-    }, 700);
+    }, 800);
   };
 
   return (
-    <Container
-      ref={vantaRef}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.8 } }}
-      aria-label="Landing Page with Vanta Gold & White Fog"
-    >
-      <Title
-        animate={isAnimating ? { scale: 3, opacity: 0 } : { scale: 1, opacity: 1 }}
-        transition={{ duration: 0.7, ease: "easeIn" }}
-        aria-hidden="true"
-      >
-        Black & Gold Architecture
-      </Title>
+    <>
+      {/* Vanta Background - Full Screen */}
+      <div
+        ref={vantaRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 0,
+        }}
+      />
 
-      <SubTitle
-        animate={isAnimating ? { scale: 3, opacity: 0 } : { scale: 1, opacity: 1 }}
-        transition={{ duration: 0.7, ease: "easeIn", delay: 0.05 }}
-        aria-hidden="true"
-      >
-        Immerse in Elegance & Innovation
-      </SubTitle>
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            color: '#ffffffff',
+            fontSize: '1.25rem',
+            fontWeight: '500',
+            fontFamily: 'Arial, sans-serif',
+          }}
+        >
+          <div style={{ animation: 'pulse 2s infinite' }}>Loading Experience...</div>
+        </div>
+      )}
 
-      <EnterButton 
-        onClick={handleEnterClick} 
-        whileHover={{ scale: 1.1 }} 
-        whileTap={{ scale: 0.95 }}
-        aria-label="Enter Experience"
-        disabled={isAnimating}
+      {/* Main Content - Perfectly Centered */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          opacity: isLoading ? 0 : 1,
+          transition: 'opacity 1s ease-out',
+          fontFamily: 'Arial, sans-serif',
+        }}
       >
-        Enter Experience
-      </EnterButton>
-    </Container>
+        {/* Title */}
+        <h1
+          style={{
+            fontWeight: 900,
+            fontSize: 'clamp(2.5rem, 6vw, 4.8rem)',
+            letterSpacing: '0.1em',
+            textAlign: 'center',
+            marginBottom: '0.5em',
+            color: '#f9f9f9ff',
+            textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.4)',
+            transform: isAnimating ? 'scale(1.5)' : 'scale(1)',
+            opacity: isAnimating ? 0 : 1,
+            transition: 'all 0.7s ease-in',
+            animation: isAnimating ? 'none' : 'titleGlow 3s ease-in-out infinite alternate',
+          }}
+        >
+          Black & Gold Architecture
+        </h1>
+
+        {/* Subtitle */}
+        <h2
+          style={{
+            fontWeight: 400,
+            fontSize: 'clamp(1rem, 2vw, 1.8rem)',
+            color: '#ffffffff',
+            marginBottom: '3em',
+            letterSpacing: '0.05em',
+            textAlign: 'center',
+            transform: isAnimating ? 'scale(1.5)' : 'scale(1)',
+            opacity: isAnimating ? 0 : 1,
+            transition: 'all 0.7s ease-in 0.05s',
+          }}
+        >
+          Immerse in Elegance & Innovation
+        </h2>
+
+        {/* Enter Button */}
+        <button
+          onClick={handleEnterClick}
+          disabled={isAnimating || isLoading}
+          style={{
+            backgroundColor: 'transparent',
+            padding: '1em 3em',
+            borderRadius: '30px',
+            border: '2px solid #ffffffff',
+            color: '#ffffff',
+            fontSize: '1.25rem',
+            fontWeight: 700,
+            fontFamily: 'Arial, sans-serif',
+            cursor: isAnimating || isLoading ? 'not-allowed' : 'pointer',
+
+            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+
+            userSelect: 'none',
+            transform: isAnimating ? 'scale(1.5)' : 'scale(1)',
+            opacity: isAnimating ? 0 : 1,
+            transitionDelay: '0.1s',
+          }}
+          onMouseEnter={(e) => {
+            if (!isAnimating && !isLoading) {
+              e.target.style.transform = 'scale(1.05)';
+              e.target.style.backgroundColor = '#fff';
+              e.target.style.color = '#555';
+              e.target.style.boxShadow = '0 0 12px rgba(255, 255, 255, 0.7)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isAnimating) {
+              e.target.style.transform = 'scale(1)';
+              e.target.style.backgroundColor = 'transparent';
+              e.target.style.color = '#ffffff';
+              e.target.style.boxShadow = 'none';
+            }
+          }}
+          onMouseDown={(e) => {
+            if (!isAnimating && !isLoading) {
+              e.target.style.transform = 'scale(0.95)';
+              e.target.style.boxShadow = '0 0 6px rgba(255, 255, 255, 0.5)';
+            }
+          }}
+          onMouseUp={(e) => {
+            if (!isAnimating && !isLoading) {
+              e.target.style.transform = 'scale(1.05)';
+              e.target.style.boxShadow = '0 0 12px rgba(255, 255, 255, 0.7)';
+            }
+          }}
+        >
+          Enter Experience
+        </button>
+      </div>
+
+      {/* Custom Styles */}
+      <style jsx>{`
+        @keyframes titleGlow {
+          from {
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+          }
+          to {
+            text-shadow: 0 0 30px rgba(255, 255, 255, 1),
+              0 0 40px rgba(255, 255, 255, 0.6);
+          }
+        }
+
+        @keyframes pulse {
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+
+        @media (max-width: 768px) {
+          h1 {
+            font-size: clamp(2rem, 8vw, 3.5rem) !important;
+          }
+
+          h2 {
+            font-size: clamp(0.9rem, 4vw, 1.4rem) !important;
+            margin-bottom: 2em !important;
+          }
+
+          button {
+            font-size: 1.1rem !important;
+            padding: 0.8em 2.5em !important;
+          }
+        }
+      `}</style>
+    </>
   );
 }

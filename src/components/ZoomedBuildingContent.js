@@ -5,9 +5,14 @@ import { motion } from 'framer-motion';
 const Overlay = styled(motion.div)`
   position: fixed;
   inset: 0;
-  background: rgba(10,10,10,0.95);
-  color: ${({ theme }) => theme.colors.goldLight};
-  font-family: ${({ theme }) => theme.fonts.main};
+  background: rgba(255, 255, 255, 0.15); /* translucent white */
+  backdrop-filter: blur(14px); /* strong frosted effect */
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  color: #d4af37; /* fallback gold light color */
+  font-family: Arial, sans-serif; /* Changed to Arial */
   display: flex;
   flex-direction: column;
   padding: 4vw 5vw;
@@ -17,39 +22,56 @@ const Overlay = styled(motion.div)`
 
 const CloseButton = styled(motion.button)`
   align-self: flex-end;
-  background: none;
-  border: none;
-  font-size: 2rem;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  font-size: 2.4rem;
   font-weight: 900;
-  color: ${({ theme }) => theme.colors.gold};
+  color: #d4af37; /* fallback gold color */
   cursor: pointer;
   margin-bottom: 1rem;
+  width: 3.8rem;
+  height: 3.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.goldLight};
+    background: rgba(255, 255, 255, 0.5);
+    color: #f7e162; /* lighter gold */
+    box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.75);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 16px 4px #f7e162;
   }
 `;
 
 const ContentContainer = styled.div`
   max-width: 900px;
   margin: 0 auto;
-  font-size: 1.2rem;
-  line-height: 1.6;
-  font-family: ${({ theme }) => theme.fonts.accent};
-  letter-spacing: 0.03em;
-  color: ${({ theme }) => theme.colors.goldLight};
+  font-size: 1.3rem;
+  line-height: 1.7;
+  font-family: Arial, sans-serif; /* Changed to Arial */
+  letter-spacing: 0.04em;
+  color: #d4af37; /* fallback gold light */
   user-select: text;
 `;
 
 const Title = styled.h1`
-  font-size: clamp(2rem, 6vw, 3.8rem);
+  font-size: clamp(2.2rem, 6vw, 4rem);
   font-weight: 900;
-  margin-bottom: 0.6em;
+  margin-bottom: 0.8em;
+  font-family: Arial, sans-serif; /* Changed to Arial */
 `;
 
 const Text = styled.p`
-  margin-bottom: 1.5em;
+  margin-bottom: 1.8em;
   font-weight: 400;
+  font-family: Arial, sans-serif; /* Changed to Arial */
 `;
 
 const contentByBuilding = {
