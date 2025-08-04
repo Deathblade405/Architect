@@ -25,6 +25,19 @@ export default function ExperienceScene({ onBuildingClick, onGoHome }) {
     if (!vantaEffect.current && window.VANTA && window.THREE) {
       vantaEffect.current = window.VANTA.CLOUDS({
         el: vantaRef.current,
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: window.innerHeight,
+        minWidth: window.innerWidth,
+        sunColor: 0x0,
+        sunGlareColor: 0x0,
+        sunlightColor: 0x794f0e,
+        skyColor: 0x7a9bb8, // Updated to match the blue-gray sky from image
+        cloudColor: 0x9fbade,
+        cloudShadowColor: 0xafc0d1,
+        speed: 1.2,
+        zoom: 0.75,
       });
     }
 

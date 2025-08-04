@@ -28,7 +28,7 @@ export default function LandingPage({ onEnter }) {
             vantaEffect.current.destroy();
           }
 
-          // Initialize Vanta Clouds
+          // Initialize Vanta Clouds with updated sky color
           vantaEffect.current = window.VANTA.CLOUDS({
             el: vantaRef.current,
             mouseControls: true,
@@ -36,10 +36,12 @@ export default function LandingPage({ onEnter }) {
             gyroControls: false,
             minHeight: window.innerHeight,
             minWidth: window.innerWidth,
-            skyColor: 0x68b8d7,
-            cloudColor: 0xadc1de,
-            cloudShadowColor: 0x183550,
-            sunlightColor: 0xff9933,
+            sunColor: 0x0,
+            sunGlareColor: 0x0,
+            sunlightColor: 0x794f0e, // Very dark near black
+            skyColor: 0x7a9bb8, // Updated to match the blue-gray sky from image
+            cloudColor: 0x9fbade,
+            cloudShadowColor: 0xafc0d1,
             speed: 1.2,
             zoom: 0.75,
           });
@@ -154,38 +156,41 @@ export default function LandingPage({ onEnter }) {
         {/* Title */}
         <h1
           style={{
-            fontWeight: 900,
-            fontSize: 'clamp(2.5rem, 6vw, 4.8rem)',
+            fontWeight: 400,
+            fontSize: 'clamp(3rem, 6vw, 7rem)',
             letterSpacing: '0.1em',
             textAlign: 'center',
             marginBottom: '0.5em',
             color: '#f9f9f9ff',
-            textShadow: '0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.4)',
+            fontFamily: 'Times New Roman, serif', // Changed to Times New Roman
+   
             transform: isAnimating ? 'scale(1.5)' : 'scale(1)',
             opacity: isAnimating ? 0 : 1,
             transition: 'all 0.7s ease-in',
-            animation: isAnimating ? 'none' : 'titleGlow 3s ease-in-out infinite alternate',
+  
           }}
         >
-          Black & Gold Architecture
+          <span style={{ fontSize: '1.5em' }}>J</span> ASSOCIATES
         </h1>
 
-        {/* Subtitle */}
-        <h2
+        {/* Description Paragraph */}
+        <p
           style={{
             fontWeight: 400,
             fontSize: 'clamp(1rem, 2vw, 1.8rem)',
             color: '#ffffffff',
-            marginBottom: '3em',
+            marginBottom: '1.5em',
             letterSpacing: '0.05em',
             textAlign: 'center',
+            maxWidth: '800px',
+            lineHeight: '1.6',
             transform: isAnimating ? 'scale(1.5)' : 'scale(1)',
             opacity: isAnimating ? 0 : 1,
             transition: 'all 0.7s ease-in 0.05s',
           }}
         >
-          Immerse in Elegance & Innovation
-        </h2>
+          Luxury that inspires, innovation that awes. Experience the pinnacle of extravagance, where sophistication meets refinement.
+        </p>
 
         {/* Enter Button */}
         <button
@@ -194,16 +199,13 @@ export default function LandingPage({ onEnter }) {
           style={{
             backgroundColor: 'transparent',
             padding: '1em 3em',
-            borderRadius: '30px',
             border: '2px solid #ffffffff',
             color: '#ffffff',
             fontSize: '1.25rem',
             fontWeight: 700,
             fontFamily: 'Arial, sans-serif',
             cursor: isAnimating || isLoading ? 'not-allowed' : 'pointer',
-
             transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-
             userSelect: 'none',
             transform: isAnimating ? 'scale(1.5)' : 'scale(1)',
             opacity: isAnimating ? 0 : 1,
@@ -269,7 +271,7 @@ export default function LandingPage({ onEnter }) {
             font-size: clamp(2rem, 8vw, 3.5rem) !important;
           }
 
-          h2 {
+          p {
             font-size: clamp(0.9rem, 4vw, 1.4rem) !important;
             margin-bottom: 2em !important;
           }
